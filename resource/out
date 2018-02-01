@@ -1,0 +1,28 @@
+#!/bin/sh
+
+set -eu
+set -o pipefail
+
+exec 1>&2
+
+PAYLOAD=$(mktemp graphite-event-resource.XXXXXX)
+cat > "$PAYLOAD" <&0
+
+jq \
+  --null-input \
+  --arg what "$(jq --raw-output .params.what < "$PAYLOAD")" \
+  --arg tags "$(jq --raw-output .params.tags < "$PAYLOAD")" \
+  --arg data "$(jq --raw-output .params.data < "$PAYLOAD")" \
+  '{"what" : $what, "tags" : $tags, "data" : $data}' \
+  | \
+  curl \
+    --verbose \
+    "$(jq --raw-output .source.url < "$PAYLOAD")/events/" \
+    --data @-
+
+jq \
+  --null-input \
+  --arg time "$(date +'%s')" \
+  '{ "version" : { "time" : $time } }'
+
+rm "$PAYLOAD"

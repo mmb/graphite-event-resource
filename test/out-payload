@@ -1,0 +1,10 @@
+{
+  "params": {
+    "what": "test what",
+    "tags": "tag1,tag2",
+    "data": "test data"
+  },
+  "source": {
+    "url": "http://127.0.0.1"
+  }
+}
