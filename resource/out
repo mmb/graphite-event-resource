@@ -3,7 +3,8 @@
 set -eu
 set -o pipefail
 
-exec 1>&2
+exec 3>&1 # fd 3 is used to output the json result
+exec 1>&2 # redirect stdout to stderr so it doesn't interfere with the json
 
 PAYLOAD=$(mktemp graphite-event-resource.XXXXXX)
 cat > "$PAYLOAD" <&0
@@ -20,9 +21,10 @@ jq \
     "$(jq --raw-output .source.url < "$PAYLOAD")/events/" \
     --data @-
 
+rm "$PAYLOAD"
+
 jq \
   --null-input \
   --arg time "$(date +'%s')" \
-  '{ "version" : { "time" : $time } }'
-
-rm "$PAYLOAD"
+  '{ "version" : { "time" : $time } }' \
+  >&3
