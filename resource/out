@@ -9,13 +9,10 @@ exec 1>&2 # redirect stdout to stderr so it doesn't interfere with the json
 PAYLOAD=$(mktemp graphite-event-resource.XXXXXX)
 cat > "$PAYLOAD" <&0
 
-WHAT=$(jq --raw-output .params.what < "$PAYLOAD")
-# Expand variables for $BUILD_ID, $BUILD_NAME, etc.
-WHAT=$(eval echo "$WHAT")
-TAGS=$(jq --raw-output .params.tags < "$PAYLOAD")
-TAGS=$(eval echo "$TAGS")
-DATA=$(jq --raw-output .params.data < "$PAYLOAD")
-DATA=$(eval echo "$DATA")
+# envsubst will expand variables for $BUILD_ID, $BUILD_NAME, etc.
+WHAT=$(jq --raw-output .params.what < "$PAYLOAD" | envsubst)
+TAGS=$(jq --raw-output .params.tags < "$PAYLOAD" | envsubst)
+DATA=$(jq --raw-output .params.data < "$PAYLOAD" | envsubst)
 
 jq \
   --null-input \
