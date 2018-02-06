@@ -1,5 +1,6 @@
 #!/bin/sh
 
-echo "This resource does not support in"
+set -eu
+set -o pipefail
 
-exit 1
+jq '{ "version" : .version }' <&0
